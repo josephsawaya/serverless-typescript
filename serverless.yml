@@ -1,0 +1,86 @@
+service:
+  name: serverless-typescript
+# app and org for use with dashboard.serverless.com
+app: serverless-typescript
+org: josephsawaya
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 'arn:aws:dynamodb:us-east-1:930534250134:table/test-users'
+
+
+functions:
+  get:
+    handler: handler.get
+    events:
+      - http:
+          method: get
+          path: users
+          headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+          allowCredentials: false
+  post:
+    handler: handler.post
+    events:
+      - http:
+          method: post
+          path: users
+  getID:
+    handler: handler.getID
+    events:
+      - http:
+          method: get
+          path: users/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+  updateID:
+    handler: handler.updateID
+    events:
+      - http:
+          method: put
+          path: users/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+  deleteID:
+    handler: handler.deleteID
+    events:
+      - http:
+          method: delete
+          path: users/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+
+
