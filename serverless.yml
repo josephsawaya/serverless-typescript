@@ -23,12 +23,9 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:us-east-1:930534250134:table/test-users'
+        - dynamodb:*
+        - ses:*
+      Resource: '*'
 
 
 functions:
@@ -38,14 +35,16 @@ functions:
       - http:
           method: get
           path: users
-          headers:
-            - Content-Type
-            - X-Amz-Date
-            - Authorization
-            - X-Api-Key
-            - X-Amz-Security-Token
-            - X-Amz-User-Agent
-          allowCredentials: false
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
   post:
     handler: handler.post
     events:
@@ -82,5 +81,12 @@ functions:
             parameters:
               paths:
                 id: true
+  sendEmail: 
+    handler: handler.sendEmail
+    events:
+      - http:
+          method: post
+          path: sendEmail
+          cors: true  
 
 

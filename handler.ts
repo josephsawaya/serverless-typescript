@@ -4,6 +4,9 @@ const db = new aws.DynamoDB.DocumentClient({
   region: "us-east-1",
 });
 
+const ses = new aws.SES();
+
+
 export const get = async (event) => {
   const params = {
     TableName: "test-users",
@@ -33,6 +36,9 @@ export const getID = async (event) => {
   console.log(result);
   return {
     statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Required for CORS support to work
+    },
     body: JSON.stringify({
       message: result,
       input: event,
@@ -104,3 +110,35 @@ export const deleteID = async (event) => {
     }),
   };
 };
+
+export const sendEmail = async (event) => {
+  const { to, from, subject, text } = JSON.parse(event.body);
+  const params = {
+    Destination: {
+      ToAddresses: [ to ] 
+    },
+    Message: {
+      Body: {
+        Text: { Data: text }
+      },
+      Subject: {
+        Data: subject
+      }
+    },
+    Source: from
+  }
+  await ses.sendEmail(params).promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: {
+        to,
+        from,
+        subject,
+        text
+      },
+      input: event,
+    }),
+  }
+}
