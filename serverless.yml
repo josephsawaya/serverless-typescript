@@ -87,6 +87,22 @@ functions:
       - http:
           method: post
           path: sendEmail
+          cors: true 
+
+  createEmail: 
+    handler: handler.createEmail
+    events:
+      - http:
+          method: post
+          path: createEmail
           cors: true  
+
+  sendTemplatedEmail:
+      handler: handler.sendTemplatedEmail
+      events:
+        - http:
+            method: post
+            path: sendTemplatedEmail
+            cors: true
 
 

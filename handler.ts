@@ -1,3 +1,5 @@
+import { isMainThread } from "worker_threads";
+
 const hash = require('js-sha256');
 const aws = require("aws-sdk");
 const db = new aws.DynamoDB.DocumentClient({
@@ -141,4 +143,55 @@ export const sendEmail = async (event) => {
       input: event,
     }),
   }
+}
+
+export const createEmail = async (event) => {
+  const { name, subject, text, html } = JSON.parse(event.body);
+  const params = {
+    Template: {
+      TemplateName: name,
+      SubjectPart: subject,
+      TextPart: text,
+      HtmlPart: html
+    }
+  }
+  // try {
+    await ses.createTemplate(params).promise();
+  // }catch(err){
+  //   console.log(err);
+  // }
+  
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: params,
+      input: event,
+    }),
+  }
+}
+
+export const sendTemplatedEmail = async (event) => {
+  const { from, name, to, data, config } = JSON.parse(event.body);
+  const params = {
+    Source: from,
+    Template: name,
+    Destination: {
+      ToAddresses: [ to ]
+    },
+    TemplateData: data,
+    ConfigurationSetName: config
+  };
+
+  await ses.sendTemplatedEmail(params).promise();
+  console.log(
+    "made it",
+    params
+  )
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: JSON.parse(event.body)
+    }) 
+  };
 }
