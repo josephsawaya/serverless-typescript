@@ -31,6 +31,7 @@ provider:
 functions:
   get:
     handler: handler.get
+    role: UsersTableScanRole
     events:
       - http:
           method: get
@@ -47,12 +48,14 @@ functions:
             allowCredentials: false
   post:
     handler: handler.post
+    role: UsersTablePostItemRole
     events:
       - http:
           method: post
           path: users
   getID:
     handler: handler.getID
+    role: UsersTableGetItemRole
     events:
       - http:
           method: get
@@ -63,6 +66,7 @@ functions:
                 id: true
   updateID:
     handler: handler.updateID
+    role: UsersTableUpdateItemRole
     events:
       - http:
           method: put
@@ -73,6 +77,7 @@ functions:
                 id: true
   deleteID:
     handler: handler.deleteID
+    role: UsersTableDeleteItem
     events:
       - http:
           method: delete
@@ -106,3 +111,164 @@ functions:
             cors: true
 
 
+resources: 
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UsersTable
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: password
+            AttribubteType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    
+    UsersTableScan:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: UsersTable-Scan
+      Roles:
+        # All functions using this policy need to have their role listed here
+       - !Ref UsersTableScanRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Scan
+            Resource: !GetAtt UsersTable.Arn
+
+    UsersTableScanRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UsersTableScanRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+
+    UsersTableGetItem:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: UsersTable-GetItem
+      Roles:
+        # All functions using this policy need to have their role listed here
+       - !Ref UsersTableGetItemRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:GetItem
+            Resource: !GetAtt UsersTable.Arn
+
+    UsersTableGetItemRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UsersTableGetItemRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+
+
+    UsersTablePostItem:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: UsersTable-PostItem
+      Roles:
+        # All functions using this policy need to have their role listed here
+       - !Ref UsersTablePostItemRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt UsersTable.Arn
+
+    UsersTablePostItemRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UsersTablePostItemRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+
+
+    UsersTableUpdateItem:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: UsersTable-UpdateItem
+      Roles:
+        # All functions using this policy need to have their role listed here
+       - !Ref UsersTableUpdateItemRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+            Resource: !GetAtt UsersTable.Arn
+
+    UsersTableUpdateItemRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UsersTableUpdateItemRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+
+
+    UsersTableDeleteItem:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: UsersTable-DeleteItem
+      Roles:
+        # All functions using this policy need to have their role listed here
+       - !Ref UsersTableDeleteItemRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:DeleteItem
+            Resource: !GetAtt UsersTable.Arn
+
+    UsersTableDeleteItemRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UsersTableDeleteItemRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole

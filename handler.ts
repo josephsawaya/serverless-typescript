@@ -11,7 +11,7 @@ const ses = new aws.SES();
 
 export const get = async (event) => {
   const params = {
-    TableName: "test-users",
+    TableName: "UsersTable",
   };
   const result = await db.scan(params).promise();
   return {
@@ -29,7 +29,7 @@ export const get = async (event) => {
 export const getID = async (event) => {
   const id = event.path.split("/").filter((temp) => temp)[1];
   const params = {
-    TableName: "test-users",
+    TableName: "UsersTable",
     Key: {
       username: id,
     },
@@ -53,7 +53,7 @@ export const post = async (event) => {
   const user = body.username;
   const pass = body.password;
   const params = {
-    TableName: "test-users",
+    TableName: "UsersTable",
     Item: {
       username: user,
       password: hash.sha256(pass),
@@ -74,7 +74,7 @@ export const updateID = async (event) => {
   const id = event.path.split("/").filter((temp) => temp)[1];
   const pass = body.password;
   const params = {
-    TableName: "test-users",
+    TableName: "UsersTable",
     Key: {
       username: id    
     },
@@ -98,7 +98,7 @@ export const updateID = async (event) => {
 export const deleteID = async (event) => {
   const id = event.path.split("/").filter((temp) => temp)[1];
   const params = {
-    TableName: "test-users",
+    TableName: "UsersTable",
     Key: {
       username: id,
     },
